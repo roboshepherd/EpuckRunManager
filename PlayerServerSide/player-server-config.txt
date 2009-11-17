@@ -1,0 +1,1 @@
+10:00:E8:52:BC:5A;6659;/home/newport-ril/player-server/epuck1259.cfg
