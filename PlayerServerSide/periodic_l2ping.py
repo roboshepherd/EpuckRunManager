@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import time, os, sys, sched, subprocess, re, signal
+import gobject, dbus, dbus.service, dbus.mainloop.glib 
 
 
 configfile = './player-server-config.txt'
@@ -9,15 +10,30 @@ packet_loss = ' '
 server_exist = 'False'
 server_pid = 0
 
-
-
 schedule = sched.scheduler(time.time, time.sleep)
+
+
+class Example(dbus.service.Object):
+	def __init__(self, object_path):
+		dbus.service.Object.__init__(self, dbus.SessionBus(), object_path)
+
+	@dbus.service.signal(dbus_interface='com.example.Sample', signature='ss')
+	def RobotState(self, bdaddr, sig):
+		# The signal is emitted when this method exits
+		# You can have code here if you wish
+		#pass
+		print "Now  %s robot signal is: %s" % (bdaddr, sig)
+
+	def Exit(self):
+		loop.quit()
+
 
 
 #Emit DBus-Signal : PlayerServer XXXX (Alive, Killing, Dead)
 def emit_dbus_signal(sig):
+	global dbus_signal
 	print "Emitting signal>>> Player server for Epuck " + bd_addr + ": " + sig
-
+	dbus_signal.RobotState(bd_addr, sig)
 
 def stop_player_server():
 	global server_pid, server_exist
@@ -92,10 +108,24 @@ def perform_ping(bdaddr, inc):
 def main(bdaddr, inc=5):
 	global bd_addr
 	bd_addr = bdaddr
+		
 	schedule.enter(0, 0, perform_ping, (bdaddr, inc))
 	schedule.run()
+	loop.run()
 
 if __name__ == '__main__':
+	dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+
+	session_bus = dbus.SessionBus()
+	name = dbus.service.BusName('com.example.Sample', session_bus)
+	#object = TestObject(session_bus)
+
+	dbus_signal = Example('/robotsignal')
+	loop = gobject.MainLoop()
+	print "Running example signal emitter service."
+	#print usage	
+
+
 	numargs = len(sys.argv) - 1
 	if numargs < 1 or numargs > 2:
 		print "usage:" + sys.argv[0] + "bdaddr [sec delay]"
