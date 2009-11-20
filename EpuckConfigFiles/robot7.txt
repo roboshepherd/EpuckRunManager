@@ -1,0 +1,1 @@
+7;10:00:E8:52:C7:6C;6607;../PlayerConfigFiles/epuck1271.cfg

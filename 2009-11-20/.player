@@ -1,0 +1,2 @@
+configfile.cc:159 error   : unable to open world file ../PlayerConfigFiles/epuck1247.cfg : No such file or directory
+server.cc:144 error   : failed to load config file ../PlayerConfigFiles/epuck1247.cfg

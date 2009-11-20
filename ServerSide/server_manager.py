@@ -6,6 +6,7 @@ import gobject, dbus, dbus.service, dbus.mainloop.glib
 schedule = sched.scheduler(time.time, time.sleep)
 
 class glb: # gloabl variables
+	config_path = '../EpuckConfigFiles'
 	robotid = -1
 	configfile = ' '
 	bd_addr = ' '
@@ -63,8 +64,8 @@ def get_config(config):
  
 def start_player_server():
 	port = get_config('port')
-	cfgfile = get_config('cfgfile')
-	cmd = "/usr/bin/robot-player -q -p " + port + " " + cfgfile + " " + "&"
+	player_cfgfile = get_config('cfgfile')
+	cmd = "/usr/bin/robot-player -q -p " + port + " " + player_cfgfile + " " + "&"
 	subproc = subprocess.Popen([cmd, ], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
 	#stdout_value = subproc.communicate()
 	print '\t at time:', time.time()
@@ -126,7 +127,7 @@ if __name__ == '__main__':
 		sys.exit(1)
 	else:
 		glb.robotid = int(sys.argv[1])
-		glb.configfile = './robot'+sys.argv[1]+'.txt' # cfg file as "robot<X>.txt"
+		glb.configfile = glb.config_path + '/robot'+sys.argv[1]+'.txt' # cfg file as "<config_path>/robot<X>.txt"
 		glb.bd_addr = get_config('bdaddr')
 		glb.DBUS_PATH = '/robot'+sys.argv[1]
 

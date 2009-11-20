@@ -4,6 +4,7 @@ import time, os, sys, sched, subprocess, re, signal, traceback
 import gobject, dbus, dbus.service, dbus.mainloop.glib 
 
 class glb: # gloabl variables
+	config_path = '../EpuckConfigFiles'
 	robotid = -1
 	configfile = ' '
 	bd_addr = ' '
@@ -13,11 +14,29 @@ class glb: # gloabl variables
 	client_pid = 0
 	robot_state = ' '
 
+def start_client():
+	port = get_config('port')
+	cmd = "./go_avoiding_obstacle" + " " + "&"
+	subproc = subprocess.Popen([cmd, ], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+	#stdout_value = subproc.communicate()
+	print '\t at time:', time.time()
+	print "\t client started"
+	#print '\t got player stdout_value:', stdout_value[0]
+	glb.client_pid = subproc.pid + 1 # Strange bug fixed: this is actual PID  
+	print "\t client PID: ", glb.client_pid
+	glb.client_exist = 'True'
+
+def stop_client():
+	print "\t Stopping client >>> PID: ", glb.client_pid
+	if(glb.client_pid > 0):
+		os.kill(glb.client_pid, signal.SIGKILL)
+		glb.client_exist = 'False'
 
 def manage_client():
 	if(robot_state == 'Live'):
 		if(client_exist = 'False'):
 			print "Starting client..."
+			start_client()
 		if (client_exist = 'True'):
 			pass
 	if(robot_state == 'Dead'):
@@ -25,6 +44,7 @@ def manage_client():
 			pass
 		if (client_exist = 'True'):
 			print "Stopping client..."
+			stop_client()
 	
 
 
@@ -69,7 +89,7 @@ if __name__ == '__main__':
 		sys.exit(1)
 	else:
 		glb.robotid = int(sys.argv[1])
-		glb.configfile = './robot'+sys.argv[1]+'.txt' # cfg file as "robot<X>.txt"
+		glb.configfile = glb.config_path + '/robot'+sys.argv[1]+'.txt' # cfg file as "<config_path>/robot<X>.txt"
 		glb.bd_addr = get_config('bdaddr')
 		glb.DBUS_PATH = '/robot'+sys.argv[1]
 
